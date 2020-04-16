@@ -4,6 +4,7 @@ from datetime import date
 import requests
 import json
 from pandas import json_normalize
+import os
 
 
 ####### GERA UM PDF NO FORMATO DE NFe de SP, USANDO COMO ENTRADA UM ARQUIVO XML
@@ -12,7 +13,12 @@ from pandas import json_normalize
 ####### OS DADOS SÃO O CONTEUDO DO XML, BASTA COPIAR E COLAR
 ####### NAO ESQUECER DE INSTALAR AS BIBLIOTECAS ANTERIORES (reportlab, pandas, ...)
 
-CNPJ_EMISSOR = ''  # 'xx.xxx.xxx/xxxx-xx' CNPJ do emissor da NFe NO FORMATO INDICADO ANTERIORMENTE
+CNPJ_EMISSOR = ''               # 'xx.xxx.xxx/xxxx-xx' CNPJ do emissor da NFe NO FORMATO INDICADO ANTERIORMENTE
+
+
+NOVO_DIRETORIO = r''            # insira o endereço do diretório onde você quer guardar o arquivo.
+                                # exemplo -->  NOVO_DIRETORIO = r'C:\Users\Usuario\Documents\NFSe'
+                                # Importante: A pasta já deve existir.
 
 
 # tipo_dado = 0 para extrair os dados do Prestador
@@ -167,8 +173,11 @@ def xml_para_pdf(data):
 
     ### GERAR O PDF ###
     pdf = canvas.Canvas(str('NFS-e_' + num_nota + '.pdf'))
+    num_nota_nome = num_nota
     num_nota = num_nota.zfill(8)
     pdf.drawInlineImage('back.jpg', 56, 202, 487, 597)
+
+    name = str('NFS-e_{}.pdf'.format(num_nota_nome))
     pdf.setTitle(str('NFS-e_' + num_nota))
 
     #CABEÇALHO
@@ -236,4 +245,9 @@ def xml_para_pdf(data):
     pdf.drawString(570, 10, '1/1')
 
     pdf.save()
-
+    try:
+        os.rename(name, str(NOVO_DIRETORIO + '\\' + name))
+    except:
+        resp = input('Já existe um arquivo com o mesmo nome no diretório. QUER SUBSTITUÍ-LO?[s/n]')
+        if(resp == 's' or resp == 'S' or resp == 'SIM' or resp == 'sim'):
+            os.replace(name, str(NOVO_DIRETORIO + '\\' + name))
